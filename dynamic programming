@@ -1,0 +1,62 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+// Function to solve the 0/1 Knapsack problem
+int knapsack(int capacity, const vector<int>& weights, const vector<int>& values, int n) {
+    // Create a 2D DP array with dimensions (n + 1) x (capacity + 1), initialized to 0
+    vector<vector<int>> dp(n + 1, vector<int>(capacity + 1, 0));
+
+    // Build the table dp[n+1][capacity+1] in a bottom-up manner
+    for (int i = 0; i <= n; ++i) {
+        for (int w = 0; w <= capacity; ++w) {
+            // Base case: 0 items or 0 capacity
+            if (i == 0 || w == 0) {
+                dp[i][w] = 0;
+            } 
+            // If the weight of the current item is less than or equal to capacity 'w'
+            else if (weights[i - 1] <= w) {
+                // Maximize value by either including the current item or excluding it
+                dp[i][w] = max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);
+            } 
+            // If the weight of the current item exceeds the capacity 'w', exclude it
+            else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+
+    // Optional: Backtrack to find which items were included
+    int temp_w = capacity;
+    cout << "\nItems included in the knapsack (Weight, Value):\n";
+    for (int i = n; i > 0 && temp_w > 0; --i) {
+        // If the item comes from the top (not included), skip it
+        if (dp[i][temp_w] != dp[i - 1][temp_w]) {
+            cout << "- Item " << i << " (Weight: " << weights[i - 1] 
+                 << ", Value: " << values[i - 1] << ")\n";
+            temp_w -= weights[i - 1]; // Subtract the item's weight
+        }
+    }
+
+    // The bottom-right cell contains the maximum value that can be attained
+    return dp[n][capacity];
+}
+
+int main() {
+    // Example dataset
+    vector<int> values = {60, 100, 120};
+    vector<int> weights = {10, 20, 30};
+    int capacity = 50;
+    int n = values.size();
+
+    cout << "--- 0/1 Knapsack Problem (Dynamic Programming) ---\n";
+    cout << "Knapsack Capacity: " << capacity << "\n";
+    
+    int max_value = knapsack(capacity, weights, values, n);
+
+    cout << "\nMaximum Value that can be obtained: " << max_value << "\n";
+
+    return 0;
+}
